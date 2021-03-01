@@ -1,0 +1,35 @@
+{
+  "StartAt": "Init",
+  "States": {
+    "Init": {
+      "Type": "Pass",
+      "Parameters": {
+        "subjects": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+      },
+      "Next": "Map"
+    },
+    "Map": {
+      "Type": "Map",
+      "ItemsPath": "$.subjects",
+      "Parameters": {
+        "subject.$": "$$.Map.Item.Value"
+      },
+      "Iterator": {
+        "StartAt": "ExecuteFizzBuzzValueForNumber",
+        "States": {
+          "ExecuteFizzBuzzValueForNumber": {
+            "Type": "Task",
+            "Parameters": {
+              "StateMachineArn": "${FizzBuzzValueForNumberStateMachineArn}",
+              "Input.$": "$"
+            },
+            "Resource": "arn:aws:states:::states:startExecution.sync:2",
+            "OutputPath": "$.Output",
+            "End": true
+          }
+        }
+      },
+      "End": true
+    }
+  }
+}

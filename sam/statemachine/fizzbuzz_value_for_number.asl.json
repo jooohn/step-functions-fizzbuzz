@@ -1,0 +1,101 @@
+{
+  "StartAt": "SetDivisibleBy3Input",
+  "States": {
+    "SetDivisibleBy3Input": {
+      "Type": "Pass",
+      "Parameters": {
+        "dividened.$": "$.subject",
+        "divisor": 3
+      },
+      "ResultPath": "$.divisibleBy3Input",
+      "Next": "DivisibleBy3"
+    },
+    "DivisibleBy3": {
+      "Type": "Task",
+      "Parameters": {
+        "StateMachineArn": "${IsDivisibleStateMachineArn}",
+        "Input.$": "$.divisibleBy3Input"
+      },
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "ResultSelector": {
+        "result.$": "$.Output"
+      },
+      "ResultPath": "$.isDivisibleBy3",
+      "Next": "SetDivisibleBy5Input"
+    },
+    "SetDivisibleBy5Input": {
+      "Type": "Pass",
+      "Parameters": {
+        "dividened.$": "$.subject",
+        "divisor": 5
+      },
+      "ResultPath": "$.divisibleBy5Input",
+      "Next": "DivisibleBy5"
+    },
+    "DivisibleBy5": {
+      "Type": "Task",
+      "Parameters": {
+        "StateMachineArn": "${IsDivisibleStateMachineArn}",
+        "Input.$": "$.divisibleBy5Input"
+      },
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "ResultSelector": {
+        "result.$": "$.Output"
+      },
+      "ResultPath": "$.isDivisibleBy5",
+      "Next": "Judge"
+    },
+    "Judge": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            {
+              "BooleanEquals": true,
+              "Variable": "$.isDivisibleBy3.result"
+            },
+            {
+              "BooleanEquals": true,
+              "Variable": "$.isDivisibleBy5.result"
+            }
+          ],
+          "Next": "FizzBuzz"
+        },
+        {
+          "BooleanEquals": true,
+          "Variable": "$.isDivisibleBy3.result",
+          "Next": "Fizz"
+        },
+        {
+          "BooleanEquals": true,
+          "Variable": "$.isDivisibleBy5.result",
+          "Next": "Buzz"
+        }
+      ],
+      "Default": "Number"
+    },
+    "FizzBuzz": {
+      "Type": "Pass",
+      "Result": "FizzBuzz",
+      "End": true
+    },
+    "Fizz": {
+      "Type": "Pass",
+      "Result": "Fizz",
+      "End": true
+    },
+    "Buzz": {
+      "Type": "Pass",
+      "Result": "Buzz",
+      "End": true
+    },
+    "Number": {
+      "Type": "Pass",
+      "Parameters": {
+        "result.$": "States.Format('{}', $.subject)"
+      },
+      "OutputPath": "$.result",
+      "End": true
+    }
+  }
+}

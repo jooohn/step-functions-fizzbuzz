@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  FizzBuzz
+
+  Solve FizzBuzz problem with Step Functions.
+
+Resources:
+  IsDivisibleStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/is_divisible.asl.json
+      Policies:
+        - CloudWatchPutMetricPolicy: {}
+  FizzBuzzValueForNumberStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/fizzbuzz_value_for_number.asl.json
+      DefinitionSubstitutions:
+        IsDivisibleStateMachineArn: !GetAtt IsDivisibleStateMachine.Arn
+      Policies:
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt IsDivisibleStateMachine.Name
+        - Statement: &sync-execution-statement
+            - Effect: Allow
+              Action:
+                - states:DescribeExecution
+                - states:StopExecution
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - events:PutTargets
+                - events:PutRule
+                - events:DescribeRule
+              Resource:
+                Fn::Join:
+                  - ':'
+                  - - arn
+                    - !Ref AWS::Partition
+                    - events
+                    - !Ref AWS::Region
+                    - !Ref AWS::AccountId
+                    - rule/StepFunctionsGetEventsForStepFunctionsExecutionRule
+  SolveFizzBuzzStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/solve_fizzbuzz.asl.json
+      DefinitionSubstitutions:
+        FizzBuzzValueForNumberStateMachineArn: !GetAtt FizzBuzzValueForNumberStateMachine.Arn
+      Policies:
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt FizzBuzzValueForNumberStateMachine.Name
+        - Statement: *sync-execution-statement
