@@ -4,7 +4,7 @@
     "SetDivisibleBy3Input": {
       "Type": "Pass",
       "Parameters": {
-        "dividened.$": "$.subject",
+        "dividend.$": "$.subject",
         "divisor": 3
       },
       "ResultPath": "$.divisibleBy3Input",
@@ -26,7 +26,7 @@
     "SetDivisibleBy5Input": {
       "Type": "Pass",
       "Parameters": {
-        "dividened.$": "$.subject",
+        "dividend.$": "$.subject",
         "divisor": 5
       },
       "ResultPath": "$.divisibleBy5Input",

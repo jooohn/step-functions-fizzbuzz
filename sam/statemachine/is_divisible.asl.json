@@ -22,7 +22,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "NumericEqualsPath": "$.dividened",
+          "NumericEqualsPath": "$.dividend",
           "Variable": "$.state.iterator[0]",
           "Next": "Judge"
         }
